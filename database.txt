@@ -1,0 +1,2315 @@
+MariaDB [(none)]> create database ase_project;
+Query OK, 1 row affected (0.00 sec)
+
+MariaDB [(none)]> use ase_project
+Database changed
+MariaDB [ase_project]> create table student_info(
+    -> roll_num int NOT NULL AUTO_INCREMENT,
+    -> name varchar(50),
+    -> email varchar(100),
+    -> phone int,
+    -> gender varchar(10),
+    -> psw varchar(100),
+    -> PRIMARY KEY(roll_num));
+
+
+
+
+
+
+<?php 
+    $name = $_POST['name'];
+	$email = $_POST['email'];
+	$phone = $_POST['phone'];
+	$gender = $_POST['gender'];
+	$psw = $_POST['psw'];
+	$cpsw = $_POST['cpsw']; 
+	$database = "ase_project";
+	$table = "student_info";	
+
+$link = mysqli_connect('127.0.0.1','root','');
+
+mysql_select_db($database)
+or die ("Could not select database because ".mysql_error());
+
+$check = "select roll_num from $table where name = '".$_POST['name']."';"; 
+$qry = mysql_query($check)
+or die ("Could not match data because ".mysql_error());
+
+$num_rows = mysql_num_rows($qry); 
+
+if ($num_rows != 0) { 
+echo "<b>Sorry,  the username $name is already taken.<br>";
+echo "<a href=studentRegister.html><b>Try again</a>";
+exit; 
+}
+else{
+
+	$sql = "INSERT INTO student_info (name,email,phone,gender,psw) VALUES ('$name','$email','$phone','$gender','$psw')";
+
+	if(!mysqli_query($link,$sql)){
+		echo 'Not Inserted';
+	}
+	else{
+		echo 'Inserted';
+	}
+}
+?>
+
+
+
+
+MariaDB [(none)]> use ase_project
+Database changed
+MariaDB [ase_project]> create table admin_login(
+    -> id int NOT NULL AUTO_INCREMENT,
+    -> username varchar(50),
+    -> psw varchar(100),
+    -> PRIMARY KEY(id));
+Query OK, 0 rows affected (0.20 sec)
+
+MariaDB [ase_project]> insert into admin_login values (admin,admin@123);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '@123)' at line 1
+MariaDB [ase_project]> insert into admin_login values ('admin','admin@123');
+ERROR 1136 (21S01): Column count doesn't match value count at row 1
+MariaDB [ase_project]> insert into admin_login values ('1231','admin','admin@123');
+Query OK, 1 row affected (0.05 sec)
+
+MariaDB [ase_project]> select * from admin_login;
++------+----------+-----------+
+| id   | username | psw       |
++------+----------+-----------+
+| 1231 | admin    | admin@123 |
++------+----------+-----------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> drop table admin_login;
+Query OK, 0 rows affected (0.26 sec)
+
+MariaDB [ase_project]> create table admin_login(
+    -> id int NOT NULL AUTO_INCREMENT,
+    -> username varchar(50),
+    -> password varchar(100),
+    -> PRIMARY KEY(id));
+Query OK, 0 rows affected (0.19 sec)
+
+MariaDB [ase_project]> insert into admin_login values ('1231','admin','admin@123');
+Query OK, 1 row affected (0.04 sec)
+
+MariaDB [ase_project]> create table instructor_login(
+    -> id int NOT NULL AUTO_INCREMENT,
+    -> username varchar(50),
+    -> password varchar(100),
+    -> PRIMARY KEY(id));
+Query OK, 0 rows affected (0.23 sec)
+
+MariaDB [ase_project]> insert into instructor_login values ('2131','instructor','inst@123');
+Query OK, 1 row affected (0.04 sec)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<?php 
+	session_start();
+
+	// variable declaration
+	$name = "";
+	$email    = "";
+	$phone    = "";
+	$gender    = "";
+	$psw    = "";
+	$cpsw    = "";
+	
+	$errors = array(); 
+	$_SESSION['success'] = "";
+
+	// connect to database
+	$db = mysqli_connect('localhost', 'root', '');
+
+	if ($db->connect_error) {
+    die("Connection failed: " . $db->connect_error);
+}
+echo "Connected successfully";
+
+		if (isset($_POST['reg_user'])) {
+		// receive all input values from the form
+			echo "1";
+		$name = mysqli_real_escape_string($db, $_POST['name']);
+		$email = mysqli_real_escape_string($db, $_POST['email']);
+		$phone = mysqli_real_escape_string($db, $_POST['phone']);
+		$gender = mysqli_real_escape_string($db, $_POST['gender']);
+		$psw = mysqli_real_escape_string($db, $_POST['psw']);
+		$cpsw = mysqli_real_escape_string($db, $_POST['cpsw']);
+
+if (Empty($name)) {
+array_push($errors, "Username is required");}
+elseif (Empty($psw)) {
+array_push($errors, "password is required");}
+elseif (Empty($email)) {
+array_push($errors, "Email is required");}
+elseif (Empty($gender)) {
+array_push($errors, "Gender is required");}
+elseif (Empty($phone)) {
+array_push($errors, "Phone Number is required");}
+elseif(is_numeric($name)){
+echo "<b>Accepts only Letters for UserName!! .... <a href=studentRegister.html><b>Try again</a> ";exit;}
+elseif(!is_numeric($phone)){
+echo "<b>Accepts only Integer for Phone Number!! .... <a href=studentRegister.html><b>Try again</a> ";exit;}
+elseif (strlen($name) < 6) {
+echo "<b>Too short for your Password!! .... <a href=studentRegister.html><b>Try again</a><br>";exit;}
+elseif ($psw != $cpsw) {
+ array_push($errors, "The two passwords do not match");
+}
+
+// register user if there are no errors in the form
+		if (count($errors) == 0) {
+			echo "2";
+			$psw = md5($psw);//encrypt the password before saving in the database
+		$query = mysql_query("INSERT INTO student_info (name, email, phone, gender, psw) VALUES('$name', '$email','$phone', '$gender', '$psw')")   or die("Could not insert data because ".mysql_error());
+
+		if ($db->query($query) === TRUE) {
+    echo "New record created successfully";
+	} 
+	else {
+    echo "Error: " . $query . "<br>" . $db->error;
+	}
+
+	$db->close();
+			
+			}
+		}
+
+?>
+
+
+
+
+MariaDB [ase_project]> create table instructor_login(
+    -> id int NOT NULL AUTO_INCREMENT,
+    -> username varchar(50),
+    -> password varchar(100),
+    -> PRIMARY KEY(id));
+Query OK, 0 rows affected (0.23 sec)
+
+MariaDB [ase_project]> insert into instructor_login values ('2131','instructor','inst@123');
+Query OK, 1 row affected (0.04 sec)
+
+MariaDB [ase_project]> select * from student_info;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from student_info;
++----------+------+-------+-------+--------+------+
+| roll_num | name | email | phone | gender | psw  |
++----------+------+-------+-------+--------+------+
+|        1 |      |       |     0 |        |      |
++----------+------+-------+-------+--------+------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select * from student_info;
++----------+--------+-------------------+------------+--------+--------+
+| roll_num | name   | email             | phone      | gender | psw    |
++----------+--------+-------------------+------------+--------+--------+
+|        1 |        |                   |          0 |        |        |
+|        2 | harsha | ascvsdc@gmail.com | 2147483647 | male   | harsha |
++----------+--------+-------------------+------------+--------+--------+
+2 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from student_info;
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id:    42
+Current database: ase_project
+
++----------+------------+-------------------+------------+--------+---------+
+| roll_num | name       | email             | phone      | gender | psw     |
++----------+------------+-------------------+------------+--------+---------+
+|        1 |            |                   |          0 |        |         |
+|        2 | harsha     | ascvsdc@gmail.com | 2147483647 | male   | harsha  |
+|        3 | vasupradha | vasu@gmail.com    | 2147483647 | female | vasu123 |
+|        4 | tirumala   | tiru@gmail.com    | 2147483647 | male   | tiru123 |
++----------+------------+-------------------+------------+--------+---------+
+4 rows in set (0.02 sec)
+
+MariaDB [ase_project]> select * from student_info;
++----------+------------+-------------------+------------+--------+---------+
+| roll_num | name       | email             | phone      | gender | psw     |
++----------+------------+-------------------+------------+--------+---------+
+|        1 |            |                   |          0 |        |         |
+|        2 | harsha     | ascvsdc@gmail.com | 2147483647 | male   | harsha  |
+|        3 | vasupradha | vasu@gmail.com    | 2147483647 | female | vasu123 |
+|        4 | tirumala   | tiru@gmail.com    | 2147483647 | male   | tiru123 |
++----------+------------+-------------------+------------+--------+---------+
+4 rows in set (0.00 sec)
+
+MariaDB [ase_project]> alter table student_info
+    -> ;
+Query OK, 0 rows affected (0.02 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> create table course_register(
+    -> courseId int NOT NULL,
+    -> courseName varchar(100),
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 3
+MariaDB [ase_project]> create table courses(
+    -> courseId int NOT NULL,
+    -> courseName varchar(100),
+    -> subNumber int NOT NULL,
+    -> PRIMARY KEY(courseId));
+Query OK, 0 rows affected (0.59 sec)
+
+MariaDB [ase_project]> insert into courses values ('611','Java','1');
+Query OK, 1 row affected (0.10 sec)
+
+MariaDB [ase_project]> insert into courses values ('612','Python','1');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> insert into courses values ('621','Machine Learning','2');
+Query OK, 1 row affected (0.05 sec)
+
+MariaDB [ase_project]> insert into courses values ('622','Cyber Security','2');
+Query OK, 1 row affected (0.04 sec)
+
+MariaDB [ase_project]> insert into courses values ('631','Computer Networks','3');
+Query OK, 1 row affected (0.04 sec)
+
+MariaDB [ase_project]> insert into courses values ('632','Data Structures','3');
+Query OK, 1 row affected (0.05 sec)
+
+MariaDB [ase_project]> insert into courses values ('641','Blockchain Technology','4');
+Query OK, 1 row affected (0.04 sec)
+
+MariaDB [ase_project]> insert into courses values ('642','Graph Theory','4');
+Query OK, 1 row affected (0.05 sec)
+
+MariaDB [ase_project]> insert into courses values ('651','Java Script','5');
+Query OK, 1 row affected (0.05 sec)
+
+MariaDB [ase_project]> insert into courses values ('652','Mysql','5');
+Query OK, 1 row affected (0.05 sec)
+
+MariaDB [ase_project]> create table accounts(
+    -> sno int NOT NULL AUTO_INCREMENT,
+    -> funds int,
+    -> exp int);
+ERROR 1075 (42000): Incorrect table definition; there can be only one auto column and it must be defined as a key
+MariaDB [ase_project]> create table accounts(
+    -> sno int NOT NULL AUTO_INCREMENT,
+    -> funds int,
+    -> exp int,
+    -> PRIMARY KEY(sno));
+Query OK, 0 rows affected (0.21 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+------+
+| sno | funds | exp  |
++-----+-------+------+
+|   1 |     0 |    0 |
+|   2 |     0 |    0 |
+|   3 |     0 |    0 |
+|   4 |     0 |    0 |
+|   5 |     0 |    0 |
++-----+-------+------+
+5 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+------+
+| sno | funds | exp  |
++-----+-------+------+
+|   1 |     0 |    0 |
+|   2 |     0 |    0 |
+|   3 |     0 |    0 |
+|   4 |     0 |    0 |
+|   5 |     0 |    0 |
+|   6 |     0 |    0 |
+|   7 |     0 |    0 |
++-----+-------+------+
+7 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+------+
+| sno | funds | exp  |
++-----+-------+------+
+|   1 |     0 |    0 |
+|   2 |     0 |    0 |
+|   3 |     0 |    0 |
+|   4 |     0 |    0 |
+|   5 |     0 |    0 |
+|   6 |     0 |    0 |
+|   7 |     0 |    0 |
++-----+-------+------+
+7 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+--------+
+| sno | funds | exp    |
++-----+-------+--------+
+|   1 |     0 |      0 |
+|   2 |     0 |      0 |
+|   3 |     0 |      0 |
+|   4 |     0 |      0 |
+|   5 |     0 |      0 |
+|   6 |     0 |      0 |
+|   7 |     0 |      0 |
+|   8 | 45343 | 453473 |
++-----+-------+--------+
+8 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+--------+
+| sno | funds | exp    |
++-----+-------+--------+
+|   1 |     0 |      0 |
+|   2 |     0 |      0 |
+|   3 |     0 |      0 |
+|   4 |     0 |      0 |
+|   5 |     0 |      0 |
+|   6 |     0 |      0 |
+|   7 |     0 |      0 |
+|   8 | 45343 | 453473 |
+|   9 | 45343 |      0 |
++-----+-------+--------+
+9 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+--------+
+| sno | funds | exp    |
++-----+-------+--------+
+|   1 |     0 |      0 |
+|   2 |     0 |      0 |
+|   3 |     0 |      0 |
+|   4 |     0 |      0 |
+|   5 |     0 |      0 |
+|   6 |     0 |      0 |
+|   7 |     0 |      0 |
+|   8 | 45343 | 453473 |
+|   9 | 45343 |      0 |
+|  10 |   424 |      0 |
++-----+-------+--------+
+10 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+--------+
+| sno | funds | exp    |
++-----+-------+--------+
+|   1 |     0 |      0 |
+|   2 |     0 |      0 |
+|   3 |     0 |      0 |
+|   4 |     0 |      0 |
+|   5 |     0 |      0 |
+|   6 |     0 |      0 |
+|   7 |     0 |      0 |
+|   8 | 45343 | 453473 |
+|   9 | 45343 |      0 |
+|  10 |   424 |      0 |
+|  11 |     0 |      0 |
+|  12 |   424 | 453473 |
++-----+-------+--------+
+12 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+--------+
+| sno | funds | exp    |
++-----+-------+--------+
+|   1 |     0 |      0 |
+|   2 |     0 |      0 |
+|   3 |     0 |      0 |
+|   4 |     0 |      0 |
+|   5 |     0 |      0 |
+|   6 |     0 |      0 |
+|   7 |     0 |      0 |
+|   8 | 45343 | 453473 |
+|   9 | 45343 |      0 |
+|  10 |   424 |      0 |
+|  11 |     0 |      0 |
+|  12 |   424 | 453473 |
+|  13 |   424 |      0 |
++-----+-------+--------+
+13 rows in set (0.00 sec)
+
+MariaDB [ase_project]>
+
+
+
+
+
+
+
+
+
+
+E:\XAMPP\mysql\bin>mysql -u root -p
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 4
+Server version: 10.1.38-MariaDB mariadb.org binary distribution
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> use ase_project
+Database changed
+MariaDB [ase_project]> show tables;
++-----------------------+
+| Tables_in_ase_project |
++-----------------------+
+| accounts              |
+| admin_login           |
+| courses               |
+| instructor_login      |
+| student_info          |
++-----------------------+
+5 rows in set (0.06 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+--------+
+| sno | funds | exp    |
++-----+-------+--------+
+|   1 |     0 |      0 |
+|   2 |     0 |      0 |
+|   3 |     0 |      0 |
+|   4 |     0 |      0 |
+|   5 |     0 |      0 |
+|   6 |     0 |      0 |
+|   7 |     0 |      0 |
+|   8 | 45343 | 453473 |
+|   9 | 45343 |      0 |
+|  10 |   424 |      0 |
+|  11 |     0 |      0 |
+|  12 |   424 | 453473 |
+|  13 |   424 |      0 |
+|  14 |     0 |      0 |
+|  15 |     0 |      0 |
+|  16 |     0 |      0 |
+|  17 |     0 |      0 |
+|  18 |     0 |      0 |
+|  19 |     0 |      0 |
++-----+-------+--------+
+19 rows in set (0.04 sec)
+
+MariaDB [ase_project]> select sum(funds) from accounts;
++------------+
+| sum(funds) |
++------------+
+|      91958 |
++------------+
+1 row in set (0.05 sec)
+
+MariaDB [ase_project]> select sum(funds),sum(exp) from accounts;
++------------+----------+
+| sum(funds) | sum(exp) |
++------------+----------+
+|      91958 |   906946 |
++------------+----------+
+1 row in set (0.02 sec)
+
+MariaDB [ase_project]> select sum(funds)-sum(exp) from accounts;
++---------------------+
+| sum(funds)-sum(exp) |
++---------------------+
+|             -814988 |
++---------------------+
+1 row in set (0.02 sec)
+
+MariaDB [ase_project]> select sum(funds)-sum(exp) from 'accounts';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ''accounts'' at line 1
+MariaDB [ase_project]> select sum(funds)-sum(exp) from 'accounts' as saving;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ''accounts' as saving' at line 1
+MariaDB [ase_project]> select sum(funds)-sum(exp) from accounts as saving;
++---------------------+
+| sum(funds)-sum(exp) |
++---------------------+
+|             -814988 |
++---------------------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select sum(funds)-sum(exp) as savings from accounts ;
++---------+
+| savings |
++---------+
+| -814988 |
++---------+
+1 row in set (0.06 sec)
+
+MariaDB [ase_project]> create table registered_course(
+    -> Subject-1 varchar(50),
+    -> Subject-2 varchar(50),
+    -> Subject-3 varchar(50),
+    -> Subject-4 varchar(50),
+    -> Subject-5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '-1 varchar(50),
+Subject-2 varchar(50),
+Subject-3 varchar(50),
+Subject-4 varchar(' at line 2
+MariaDB [ase_project]> create table registered_course(
+    -> roll_num int NOT NULL,
+    -> Subject-1 varchar(50),
+    -> Subject-2 varchar(50),
+    -> Subject-3 varchar(50),
+    -> Subject-4 varchar(50),
+    -> Subject-5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '-1 varchar(50),
+Subject-2 varchar(50),
+Subject-3 varchar(50),
+Subject-4 varchar(' at line 3
+MariaDB [ase_project]> create table registered_course(
+    -> roll_num int NOT NULL,
+    -> Subject1 varchar(50),
+    -> Subject2 varchar(50),
+    -> Subject3 varchar(50),
+    -> Subject4 varchar(50),
+    -> Subject5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.52 sec)
+
+MariaDB [ase_project]> SELECT * FROM student_info WHERE name= name AND psw= psw;
++----------+------------+-------------------+------------+--------+---------+
+| roll_num | name       | email             | phone      | gender | psw     |
++----------+------------+-------------------+------------+--------+---------+
+|        1 |            |                   |          0 |        |         |
+|        2 | harsha     | ascvsdc@gmail.com | 2147483647 | male   | harsha  |
+|        3 | vasupradha | vasu@gmail.com    | 2147483647 | female | vasu123 |
+|        4 | tirumala   | tiru@gmail.com    | 2147483647 | male   | tiru123 |
++----------+------------+-------------------+------------+--------+---------+
+4 rows in set (0.02 sec)
+
+MariaDB [ase_project]> SELECT * FROM student_info WHERE name= vasupradha AND psw= vasu123;
+ERROR 1054 (42S22): Unknown column 'vasupradha' in 'where clause'
+MariaDB [ase_project]> SELECT * FROM student_info WHERE roll_num=2;
++----------+--------+-------------------+------------+--------+--------+
+| roll_num | name   | email             | phone      | gender | psw    |
++----------+--------+-------------------+------------+--------+--------+
+|        2 | harsha | ascvsdc@gmail.com | 2147483647 | male   | harsha |
++----------+--------+-------------------+------------+--------+--------+
+1 row in set (0.02 sec)
+
+MariaDB [ase_project]> SELECT * FROM student_info WHERE name= vasupradha;
+ERROR 1054 (42S22): Unknown column 'vasupradha' in 'where clause'
+MariaDB [ase_project]> SELECT * FROM student_info WHERE name= 'vasupradha' AND psw= 'vasu123';
++----------+------------+----------------+------------+--------+---------+
+| roll_num | name       | email          | phone      | gender | psw     |
++----------+------------+----------------+------------+--------+---------+
+|        3 | vasupradha | vasu@gmail.com | 2147483647 | female | vasu123 |
++----------+------------+----------------+------------+--------+---------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select roll_num from student_info where name='vasupradha';
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id:    12
+Current database: ase_project
+
++----------+
+| roll_num |
++----------+
+|        3 |
++----------+
+1 row in set (0.07 sec)
+
+MariaDB [ase_project]> select * from registered_courses;
+ERROR 1146 (42S02): Table 'ase_project.registered_courses' doesn't exist
+MariaDB [ase_project]> select * from registered_course;
+Empty set (0.08 sec)
+
+MariaDB [ase_project]> select * from registered_course;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course where roll_num = 4;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+1 row in set (0.05 sec)
+
+MariaDB [ase_project]> select * from registered_course where roll_num = 4;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+2 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Python   | Cyber Security   | Data Structures   | Graph Theory          | MySql       |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+3 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Python   | Cyber Security   | Data Structures   | Graph Theory          | MySql       |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+4 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Python   | Cyber Security   | Data Structures   | Graph Theory          | MySql       |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+5 rows in set (0.00 sec)
+
+MariaDB [ase_project]> drop table registered_course;
+Query OK, 0 rows affected (0.61 sec)
+
+MariaDB [ase_project]> create table registered_course(
+    -> roll_num int NOT NULL,
+    -> Subject1 varchar(50),
+    -> Subject2 varchar(50),
+    -> Subject3 varchar(50),
+    -> Subject4 varchar(50),
+    -> Subject5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.53 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+2 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+3 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+5 rows in set (0.00 sec)
+
+MariaDB [ase_project]> drop table registered_course;
+Query OK, 0 rows affected (0.16 sec)
+
+MariaDB [ase_project]> create table registered_course(
+    -> roll_num int NOT NULL,
+    -> Subject1 varchar(50),
+    -> Subject2 varchar(50),
+    -> Subject3 varchar(50),
+    -> Subject4 varchar(50),
+    -> Subject5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.37 sec)
+
+MariaDB [ase_project]> select * from courses where courseName = 'Java';
++----------+------------+-----------+
+| courseId | courseName | subNumber |
++----------+------------+-----------+
+|      611 | Java       |         1 |
++----------+------------+-----------+
+1 row in set (0.03 sec)
+
+MariaDB [ase_project]> select courseId from courses where courseName = 'Java';
++----------+
+| courseId |
++----------+
+|      611 |
++----------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        2 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> show tables;
++-----------------------+
+| Tables_in_ase_project |
++-----------------------+
+| accounts              |
+| admin_login           |
+| courses               |
+| instructor_login      |
+| registered_course     |
+| student_info          |
++-----------------------+
+6 rows in set (0.07 sec)
+
+MariaDB [ase_project]> select * from instructor_login;
++------+------------+----------+
+| id   | username   | password |
++------+------------+----------+
+| 2131 | instructor | inst@123 |
++------+------------+----------+
+1 row in set (0.07 sec)
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ;
+Query OK, 0 rows affected (0.00 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD PRIMARY KEY (subNumber);
+ERROR 1072 (42000): Key column 'subNumber' doesn't exist in table
+MariaDB [ase_project]> ALTER TABLE courses
+    -> ADD PRIMARY KEY (subNumber);
+ERROR 1068 (42000): Multiple primary key defined
+MariaDB [ase_project]> ALTER TABLE courses\
+    -> ;
+Query OK, 0 rows affected (0.00 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> ALTER TABLE courses
+    -> ADD CONSTRAINT C_Person PRIMARY KEY (courseId,subNumber);
+ERROR 1068 (42000): Multiple primary key defined
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD sub1 int NOT NULL;
+Query OK, 0 rows affected (0.55 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD sub2 int NOT NULL;
+Query OK, 0 rows affected (0.32 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET username = 'Instructor1', password = 'inst1@123'
+    -> WHERE id = 2131;
+Query OK, 1 row affected (0.07 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [ase_project]> insert into instructor_login values ('2132','Instructor2','inst2@123','621','622');
+Query OK, 1 row affected (0.13 sec)
+
+MariaDB [ase_project]> select * from instructor_login;
++------+-------------+-----------+------+------+
+| id   | username    | password  | sub1 | sub2 |
++------+-------------+-----------+------+------+
+| 2131 | Instructor1 | inst1@123 |    0 |    0 |
+| 2132 | Instructor2 | inst2@123 |  621 |  622 |
++------+-------------+-----------+------+------+
+2 rows in set (0.00 sec)
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD FOREIGN KEY (sub1) REFERENCES courses(courseId);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`ase_project`.`#sql-5370_c`, CONSTRAINT `#sql-5370_c_ibfk_1` FOREIGN KEY (`sub1`) REFERENCES `courses` (`courseId`))
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD FOREIGN KEY (sub1) REFERENCES courses(courseId);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`ase_project`.`#sql-5370_c`, CONSTRAINT `#sql-5370_c_ibfk_1` FOREIGN KEY (`sub1`) REFERENCES `courses` (`courseId`))
+MariaDB [ase_project]> insert into instructor_login (sub1,sub2) values ('621','622') WHERE id = '2131';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = '2131'' at line 1
+MariaDB [ase_project]> insert into instructor_login (sub1,sub2) values ('621','622') WHERE id = 2131;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = 2131' at line 1
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET sub1= '611', sub2 = '612',
+    -> WHERE id = 2131;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = 2131' at line 3
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET sub1= '611', sub2 = '612',
+    -> WHERE id = '2131';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = '2131'' at line 3
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET sub1= 611, sub2 = 612,
+    -> WHERE id = 2131;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = 2131' at line 3
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET sub1= 611, sub2 = 612
+    -> WHERE id = 2131;
+Query OK, 1 row affected (0.05 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [ase_project]> select * from instructor_login;
++------+-------------+-----------+------+------+
+| id   | username    | password  | sub1 | sub2 |
++------+-------------+-----------+------+------+
+| 2131 | Instructor1 | inst1@123 |  611 |  612 |
+| 2132 | Instructor2 | inst2@123 |  621 |  622 |
++------+-------------+-----------+------+------+
+2 rows in set (0.00 sec)
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD FOREIGN KEY (sub1) REFERENCES courses(courseId);
+Query OK, 2 rows affected (0.78 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD FOREIGN KEY (sub2) REFERENCES courses(courseId);
+Query OK, 2 rows affected (1.18 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> insert into instructor_login values ('2133','Instructor3','inst3@123','631','632');
+Query OK, 1 row affected (0.08 sec)
+
+MariaDB [ase_project]> insert into instructor_login values ('2134','Instructor4','inst4@123','641','642');
+Query OK, 1 row affected (0.07 sec)
+
+MariaDB [ase_project]> insert into instructor_login values ('2135','Instructor5','inst5@123','651','652');
+Query OK, 1 row affected (0.08 sec)
+
+MariaDB [ase_project]> select * from instructor_login;
++------+-------------+-----------+------+------+
+| id   | username    | password  | sub1 | sub2 |
++------+-------------+-----------+------+------+
+| 2131 | Instructor1 | inst1@123 |  611 |  612 |
+| 2132 | Instructor2 | inst2@123 |  621 |  622 |
+| 2133 | Instructor3 | inst3@123 |  631 |  632 |
+| 2134 | Instructor4 | inst4@123 |  641 |  642 |
+| 2135 | Instructor5 | inst5@123 |  651 |  652 |
++------+-------------+-----------+------+------+
+5 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select sub1 form instructor_login where username = 'Instructor1';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'instructor_login where username = 'Instructor1'' at line 1
+MariaDB [ase_project]> select sub1 from instructor_login where username = 'Instructor1';
++------+
+| sub1 |
++------+
+|  611 |
++------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select sub1,sub2 from instructor_login where username = 'Instructor1';
++------+------+
+| sub1 | sub2 |
++------+------+
+|  611 |  612 |
++------+------+
+1 row in set (0.02 sec)
+
+MariaDB [ase_project]> select * from courses;
++----------+-----------------------+-----------+
+| courseId | courseName            | subNumber |
++----------+-----------------------+-----------+
+|      611 | Java                  |         1 |
+|      612 | Python                |         1 |
+|      621 | Machine Learning      |         2 |
+|      622 | Cyber Security        |         2 |
+|      631 | Computer Networks     |         3 |
+|      632 | Data Structures       |         3 |
+|      641 | Blockchain Technology |         4 |
+|      642 | Graph Theory          |         4 |
+|      651 | Java Script           |         5 |
+|      652 | Mysql                 |         5 |
++----------+-----------------------+-----------+
+10 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select courseName from courses where courseId = '611';
++------------+
+| courseName |
++------------+
+| Java       |
++------------+
+1 row in set (0.04 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        2 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> create table instCourse(
+    -> course varchar(50),
+    -> instructor varchar(50));
+Query OK, 0 rows affected (0.31 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Java','Instructor1');
+Query OK, 1 row affected (0.12 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Python','Instructor1');
+Query OK, 1 row affected (0.07 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Machine Learning','Instructor2');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Cyber Security','Instructor2');
+Query OK, 1 row affected (0.07 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Computer Networks','Instructor3');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Data Structures','Instructor3');
+Query OK, 1 row affected (0.07 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Blockchain Technology','Instructor4')
+    -> ;
+Query OK, 1 row affected (0.05 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Graph Theory','Instructor4');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Java Script','Instructor5');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Mysql','Instructor5');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> select * from instCourse;
++-----------------------+-------------+
+| course                | instructor  |
++-----------------------+-------------+
+| Java                  | Instructor1 |
+| Python                | Instructor1 |
+| Machine Learning      | Instructor2 |
+| Cyber Security        | Instructor2 |
+| Computer Networks     | Instructor3 |
+| Data Structures       | Instructor3 |
+| Blockchain Technology | Instructor4 |
+| Graph Theory          | Instructor4 |
+| Java Script           | Instructor5 |
+| Mysql                 | Instructor5 |
++-----------------------+-------------+
+10 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select subNumber from courses WHERE courseName = 'Java';
++-----------+
+| subNumber |
++-----------+
+|         1 |
++-----------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select * from instCourses;
+ERROR 1146 (42S02): Table 'ase_project.instcourses' doesn't exist
+MariaDB [ase_project]> select * from instCourse;
++-----------------------+-------------+
+| course                | instructor  |
++-----------------------+-------------+
+| Java                  | Instructor1 |
+| Python                | Instructor1 |
+| Machine Learning      | Instructor2 |
+| Cyber Security        | Instructor2 |
+| Computer Networks     | Instructor3 |
+| Data Structures       | Instructor3 |
+| Blockchain Technology | Instructor4 |
+| Graph Theory          | Instructor4 |
+| Java Script           | Instructor5 |
+| Mysql                 | Instructor5 |
++-----------------------+-------------+
+10 rows in set (0.00 sec)
+
+MariaDB [ase_project]> create table inst_stud_AM(
+    -> roll_num int NOT NULL,
+    -> c_name varchar(100),
+    -> attendence int NOT NULL,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 6
+MariaDB [ase_project]> create table inst_stud_AM(
+    -> roll_num int NOT NULL,
+    -> c_id int NOT NULL,
+    -> attendence int NOT NULL,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num),
+    -> FOREIGN KEY (c_id) REFERENCES courses(courseId));
+Query OK, 0 rows affected (0.29 sec)
+
+MariaDB [ase_project]> select * from inst_stud_AM;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> create table project_paper(
+    -> paper_id int NOT NULL AUTO_INCREMENT,
+    -> instructorId int NOT NULL,
+    -> file_name varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+    -> uploaded_on datetime NOT NULL,
+    -> status enum('1','0') COLLATE utf8_unicode_ci NOT NULL DEFAULT '1',
+    -> PRIMARY KEY(paper_id),
+    -> FOREIGN KEY (instructorId) REFERENCES instructor_login(id)
+    -> )ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+Query OK, 0 rows affected (0.44 sec)
+
+MariaDB [ase_project]> select * from project_paper;
++----------+--------------+--------------+---------------------+--------+
+| paper_id | instructorId | file_name    | uploaded_on         | status |
++----------+--------------+--------------+---------------------+--------+
+|        1 |         2131 | 20110920.pdf | 2019-11-13 11:51:21 | 1      |
++----------+--------------+--------------+---------------------+--------+
+1 row in set (0.03 sec)
+
+MariaDB [ase_project]> create table enroll_java(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.55 sec)
+
+MariaDB [ase_project]> create table enroll_python(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.26 sec)
+
+MariaDB [ase_project]>  create table enroll_python(
+    ->     -> roll_num int NOT NULL,
+    ->     -> attendence int,
+    ->     -> marks int,
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '-> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,' at line 2
+MariaDB [ase_project]> create table enroll_ml(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.27 sec)
+
+MariaDB [ase_project]> create table enroll_cs(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.25 sec)
+
+MariaDB [ase_project]> create table enroll_cn(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.25 sec)
+
+MariaDB [ase_project]> create table enroll_ds(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.23 sec)
+
+MariaDB [ase_project]> create table enroll_bt(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.23 sec)
+
+MariaDB [ase_project]> create table enroll_gt(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.34 sec)
+
+MariaDB [ase_project]> create table enroll_js(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.37 sec)
+
+MariaDB [ase_project]> create table enroll_mysql(
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+ERROR 1072 (42000): Key column 'roll_num' doesn't exist in table
+MariaDB [ase_project]> drop table enroll_mysql;
+ERROR 1051 (42S02): Unknown table 'ase_project.enroll_mysql'
+MariaDB [ase_project]> drop table enroll_mysql;
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id:    2
+Current database: ase_project
+
+ERROR 1051 (42S02): Unknown table 'ase_project.enroll_mysql'
+MariaDB [ase_project]> create table enroll_mysql(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.28 sec)
+
+MariaDB [ase_project]> show tables;
++-----------------------+
+| Tables_in_ase_project |
++-----------------------+
+| accounts              |
+| admin_login           |
+| courses               |
+| enroll_bt             |
+| enroll_cn             |
+| enroll_cs             |
+| enroll_ds             |
+| enroll_gt             |
+| enroll_java           |
+| enroll_js             |
+| enroll_ml             |
+| enroll_mysql          |
+| enroll_python         |
+| inst_stud_am          |
+| instcourse            |
+| instructor_login      |
+| project_paper         |
+| registered_course     |
+| student_info          |
++-----------------------+
+19 rows in set (0.05 sec)
+
+MariaDB [ase_project]>
+
+
+
+
+
+	// 	$sql5 = "SELECT roll_num FROM registered_course WHERE Subject1 = '$subname2'";
+	// $result5 = mysqli_query($conn, $sql5);
+	// echo "<form action='imarks.php' method='post'>";
+	// echo "Student Who Registered For:-".$subname2;
+	// echo "<table border='1'>";
+	// echo "<tr><td>Roll Number</td><td>Attendence</td><td>Marks</td><tr>";
+	// while($row4 = mysqli_fetch_assoc($result5)){
+	// 	echo "<tr> <td>{$row4['roll_num']}</td> <td><input type='number' name='attendence' size='15'/></td> <td><input type='number' name='marks' size='15'/></td> <tr>";
+	// }
+	// echo "</table>";
+	// echo "<br>";
+	// echo "<input type='submit'>";
+	// echo "</form>";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+E:\XAMPP\mysql\bin>mysql -u root -p
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 4
+Server version: 10.1.38-MariaDB mariadb.org binary distribution
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> use ase_project
+Database changed
+MariaDB [ase_project]> show tables;
++-----------------------+
+| Tables_in_ase_project |
++-----------------------+
+| accounts              |
+| admin_login           |
+| courses               |
+| instructor_login      |
+| student_info          |
++-----------------------+
+5 rows in set (0.06 sec)
+
+MariaDB [ase_project]> select * from accounts;
++-----+-------+--------+
+| sno | funds | exp    |
++-----+-------+--------+
+|   1 |     0 |      0 |
+|   2 |     0 |      0 |
+|   3 |     0 |      0 |
+|   4 |     0 |      0 |
+|   5 |     0 |      0 |
+|   6 |     0 |      0 |
+|   7 |     0 |      0 |
+|   8 | 45343 | 453473 |
+|   9 | 45343 |      0 |
+|  10 |   424 |      0 |
+|  11 |     0 |      0 |
+|  12 |   424 | 453473 |
+|  13 |   424 |      0 |
+|  14 |     0 |      0 |
+|  15 |     0 |      0 |
+|  16 |     0 |      0 |
+|  17 |     0 |      0 |
+|  18 |     0 |      0 |
+|  19 |     0 |      0 |
++-----+-------+--------+
+19 rows in set (0.04 sec)
+
+MariaDB [ase_project]> select sum(funds) from accounts;
++------------+
+| sum(funds) |
++------------+
+|      91958 |
++------------+
+1 row in set (0.05 sec)
+
+MariaDB [ase_project]> select sum(funds),sum(exp) from accounts;
++------------+----------+
+| sum(funds) | sum(exp) |
++------------+----------+
+|      91958 |   906946 |
++------------+----------+
+1 row in set (0.02 sec)
+
+MariaDB [ase_project]> select sum(funds)-sum(exp) from accounts;
++---------------------+
+| sum(funds)-sum(exp) |
++---------------------+
+|             -814988 |
++---------------------+
+1 row in set (0.02 sec)
+
+MariaDB [ase_project]> select sum(funds)-sum(exp) from 'accounts';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ''accounts'' at line 1
+MariaDB [ase_project]> select sum(funds)-sum(exp) from 'accounts' as saving;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ''accounts' as saving' at line 1
+MariaDB [ase_project]> select sum(funds)-sum(exp) from accounts as saving;
++---------------------+
+| sum(funds)-sum(exp) |
++---------------------+
+|             -814988 |
++---------------------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select sum(funds)-sum(exp) as savings from accounts ;
++---------+
+| savings |
++---------+
+| -814988 |
++---------+
+1 row in set (0.06 sec)
+
+MariaDB [ase_project]> create table registered_course(
+    -> Subject-1 varchar(50),
+    -> Subject-2 varchar(50),
+    -> Subject-3 varchar(50),
+    -> Subject-4 varchar(50),
+    -> Subject-5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '-1 varchar(50),
+Subject-2 varchar(50),
+Subject-3 varchar(50),
+Subject-4 varchar(' at line 2
+MariaDB [ase_project]> create table registered_course(
+    -> roll_num int NOT NULL,
+    -> Subject-1 varchar(50),
+    -> Subject-2 varchar(50),
+    -> Subject-3 varchar(50),
+    -> Subject-4 varchar(50),
+    -> Subject-5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '-1 varchar(50),
+Subject-2 varchar(50),
+Subject-3 varchar(50),
+Subject-4 varchar(' at line 3
+MariaDB [ase_project]> create table registered_course(
+    -> roll_num int NOT NULL,
+    -> Subject1 varchar(50),
+    -> Subject2 varchar(50),
+    -> Subject3 varchar(50),
+    -> Subject4 varchar(50),
+    -> Subject5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.52 sec)
+
+MariaDB [ase_project]> SELECT * FROM student_info WHERE name= name AND psw= psw;
++----------+------------+-------------------+------------+--------+---------+
+| roll_num | name       | email             | phone      | gender | psw     |
++----------+------------+-------------------+------------+--------+---------+
+|        1 |            |                   |          0 |        |         |
+|        2 | harsha     | ascvsdc@gmail.com | 2147483647 | male   | harsha  |
+|        3 | vasupradha | vasu@gmail.com    | 2147483647 | female | vasu123 |
+|        4 | tirumala   | tiru@gmail.com    | 2147483647 | male   | tiru123 |
++----------+------------+-------------------+------------+--------+---------+
+4 rows in set (0.02 sec)
+
+MariaDB [ase_project]> SELECT * FROM student_info WHERE name= vasupradha AND psw= vasu123;
+ERROR 1054 (42S22): Unknown column 'vasupradha' in 'where clause'
+MariaDB [ase_project]> SELECT * FROM student_info WHERE roll_num=2;
++----------+--------+-------------------+------------+--------+--------+
+| roll_num | name   | email             | phone      | gender | psw    |
++----------+--------+-------------------+------------+--------+--------+
+|        2 | harsha | ascvsdc@gmail.com | 2147483647 | male   | harsha |
++----------+--------+-------------------+------------+--------+--------+
+1 row in set (0.02 sec)
+
+MariaDB [ase_project]> SELECT * FROM student_info WHERE name= vasupradha;
+ERROR 1054 (42S22): Unknown column 'vasupradha' in 'where clause'
+MariaDB [ase_project]> SELECT * FROM student_info WHERE name= 'vasupradha' AND psw= 'vasu123';
++----------+------------+----------------+------------+--------+---------+
+| roll_num | name       | email          | phone      | gender | psw     |
++----------+------------+----------------+------------+--------+---------+
+|        3 | vasupradha | vasu@gmail.com | 2147483647 | female | vasu123 |
++----------+------------+----------------+------------+--------+---------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select roll_num from student_info where name='vasupradha';
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id:    12
+Current database: ase_project
+
++----------+
+| roll_num |
++----------+
+|        3 |
++----------+
+1 row in set (0.07 sec)
+
+MariaDB [ase_project]> select * from registered_courses;
+ERROR 1146 (42S02): Table 'ase_project.registered_courses' doesn't exist
+MariaDB [ase_project]> select * from registered_course;
+Empty set (0.08 sec)
+
+MariaDB [ase_project]> select * from registered_course;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course where roll_num = 4;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+1 row in set (0.05 sec)
+
+MariaDB [ase_project]> select * from registered_course where roll_num = 4;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+2 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Python   | Cyber Security   | Data Structures   | Graph Theory          | MySql       |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+3 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Python   | Cyber Security   | Data Structures   | Graph Theory          | MySql       |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+4 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Python   | Cyber Security   | Data Structures   | Graph Theory          | MySql       |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+5 rows in set (0.00 sec)
+
+MariaDB [ase_project]> drop table registered_course;
+Query OK, 0 rows affected (0.61 sec)
+
+MariaDB [ase_project]> create table registered_course(
+    -> roll_num int NOT NULL,
+    -> Subject1 varchar(50),
+    -> Subject2 varchar(50),
+    -> Subject3 varchar(50),
+    -> Subject4 varchar(50),
+    -> Subject5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.53 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+2 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+3 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        4 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
+|        3 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+5 rows in set (0.00 sec)
+
+MariaDB [ase_project]> drop table registered_course;
+Query OK, 0 rows affected (0.16 sec)
+
+MariaDB [ase_project]> create table registered_course(
+    -> roll_num int NOT NULL,
+    -> Subject1 varchar(50),
+    -> Subject2 varchar(50),
+    -> Subject3 varchar(50),
+    -> Subject4 varchar(50),
+    -> Subject5 varchar(50),
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.37 sec)
+
+MariaDB [ase_project]> select * from courses where courseName = 'Java';
++----------+------------+-----------+
+| courseId | courseName | subNumber |
++----------+------------+-----------+
+|      611 | Java       |         1 |
++----------+------------+-----------+
+1 row in set (0.03 sec)
+
+MariaDB [ase_project]> select courseId from courses where courseName = 'Java';
++----------+
+| courseId |
++----------+
+|      611 |
++----------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        2 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> show tables;
++-----------------------+
+| Tables_in_ase_project |
++-----------------------+
+| accounts              |
+| admin_login           |
+| courses               |
+| instructor_login      |
+| registered_course     |
+| student_info          |
++-----------------------+
+6 rows in set (0.07 sec)
+
+MariaDB [ase_project]> select * from instructor_login;
++------+------------+----------+
+| id   | username   | password |
++------+------------+----------+
+| 2131 | instructor | inst@123 |
++------+------------+----------+
+1 row in set (0.07 sec)
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ;
+Query OK, 0 rows affected (0.00 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD PRIMARY KEY (subNumber);
+ERROR 1072 (42000): Key column 'subNumber' doesn't exist in table
+MariaDB [ase_project]> ALTER TABLE courses
+    -> ADD PRIMARY KEY (subNumber);
+ERROR 1068 (42000): Multiple primary key defined
+MariaDB [ase_project]> ALTER TABLE courses\
+    -> ;
+Query OK, 0 rows affected (0.00 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> ALTER TABLE courses
+    -> ADD CONSTRAINT C_Person PRIMARY KEY (courseId,subNumber);
+ERROR 1068 (42000): Multiple primary key defined
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD sub1 int NOT NULL;
+Query OK, 0 rows affected (0.55 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD sub2 int NOT NULL;
+Query OK, 0 rows affected (0.32 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET username = 'Instructor1', password = 'inst1@123'
+    -> WHERE id = 2131;
+Query OK, 1 row affected (0.07 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [ase_project]> insert into instructor_login values ('2132','Instructor2','inst2@123','621','622');
+Query OK, 1 row affected (0.13 sec)
+
+MariaDB [ase_project]> select * from instructor_login;
++------+-------------+-----------+------+------+
+| id   | username    | password  | sub1 | sub2 |
++------+-------------+-----------+------+------+
+| 2131 | Instructor1 | inst1@123 |    0 |    0 |
+| 2132 | Instructor2 | inst2@123 |  621 |  622 |
++------+-------------+-----------+------+------+
+2 rows in set (0.00 sec)
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD FOREIGN KEY (sub1) REFERENCES courses(courseId);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`ase_project`.`#sql-5370_c`, CONSTRAINT `#sql-5370_c_ibfk_1` FOREIGN KEY (`sub1`) REFERENCES `courses` (`courseId`))
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD FOREIGN KEY (sub1) REFERENCES courses(courseId);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`ase_project`.`#sql-5370_c`, CONSTRAINT `#sql-5370_c_ibfk_1` FOREIGN KEY (`sub1`) REFERENCES `courses` (`courseId`))
+MariaDB [ase_project]> insert into instructor_login (sub1,sub2) values ('621','622') WHERE id = '2131';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = '2131'' at line 1
+MariaDB [ase_project]> insert into instructor_login (sub1,sub2) values ('621','622') WHERE id = 2131;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = 2131' at line 1
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET sub1= '611', sub2 = '612',
+    -> WHERE id = 2131;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = 2131' at line 3
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET sub1= '611', sub2 = '612',
+    -> WHERE id = '2131';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = '2131'' at line 3
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET sub1= 611, sub2 = 612,
+    -> WHERE id = 2131;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'WHERE id = 2131' at line 3
+MariaDB [ase_project]> UPDATE instructor_login
+    -> SET sub1= 611, sub2 = 612
+    -> WHERE id = 2131;
+Query OK, 1 row affected (0.05 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [ase_project]> select * from instructor_login;
++------+-------------+-----------+------+------+
+| id   | username    | password  | sub1 | sub2 |
++------+-------------+-----------+------+------+
+| 2131 | Instructor1 | inst1@123 |  611 |  612 |
+| 2132 | Instructor2 | inst2@123 |  621 |  622 |
++------+-------------+-----------+------+------+
+2 rows in set (0.00 sec)
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD FOREIGN KEY (sub1) REFERENCES courses(courseId);
+Query OK, 2 rows affected (0.78 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> ALTER TABLE instructor_login
+    -> ADD FOREIGN KEY (sub2) REFERENCES courses(courseId);
+Query OK, 2 rows affected (1.18 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [ase_project]> insert into instructor_login values ('2133','Instructor3','inst3@123','631','632');
+Query OK, 1 row affected (0.08 sec)
+
+MariaDB [ase_project]> insert into instructor_login values ('2134','Instructor4','inst4@123','641','642');
+Query OK, 1 row affected (0.07 sec)
+
+MariaDB [ase_project]> insert into instructor_login values ('2135','Instructor5','inst5@123','651','652');
+Query OK, 1 row affected (0.08 sec)
+
+MariaDB [ase_project]> select * from instructor_login;
++------+-------------+-----------+------+------+
+| id   | username    | password  | sub1 | sub2 |
++------+-------------+-----------+------+------+
+| 2131 | Instructor1 | inst1@123 |  611 |  612 |
+| 2132 | Instructor2 | inst2@123 |  621 |  622 |
+| 2133 | Instructor3 | inst3@123 |  631 |  632 |
+| 2134 | Instructor4 | inst4@123 |  641 |  642 |
+| 2135 | Instructor5 | inst5@123 |  651 |  652 |
++------+-------------+-----------+------+------+
+5 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select sub1 form instructor_login where username = 'Instructor1';
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'instructor_login where username = 'Instructor1'' at line 1
+MariaDB [ase_project]> select sub1 from instructor_login where username = 'Instructor1';
++------+
+| sub1 |
++------+
+|  611 |
++------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select sub1,sub2 from instructor_login where username = 'Instructor1';
++------+------+
+| sub1 | sub2 |
++------+------+
+|  611 |  612 |
++------+------+
+1 row in set (0.02 sec)
+
+MariaDB [ase_project]> select * from courses;
++----------+-----------------------+-----------+
+| courseId | courseName            | subNumber |
++----------+-----------------------+-----------+
+|      611 | Java                  |         1 |
+|      612 | Python                |         1 |
+|      621 | Machine Learning      |         2 |
+|      622 | Cyber Security        |         2 |
+|      631 | Computer Networks     |         3 |
+|      632 | Data Structures       |         3 |
+|      641 | Blockchain Technology |         4 |
+|      642 | Graph Theory          |         4 |
+|      651 | Java Script           |         5 |
+|      652 | Mysql                 |         5 |
++----------+-----------------------+-----------+
+10 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select courseName from courses where courseId = '611';
++------------+
+| courseName |
++------------+
+| Java       |
++------------+
+1 row in set (0.04 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        2 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> create table instCourse(
+    -> course varchar(50),
+    -> instructor varchar(50));
+Query OK, 0 rows affected (0.31 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Java','Instructor1');
+Query OK, 1 row affected (0.12 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Python','Instructor1');
+Query OK, 1 row affected (0.07 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Machine Learning','Instructor2');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Cyber Security','Instructor2');
+Query OK, 1 row affected (0.07 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Computer Networks','Instructor3');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Data Structures','Instructor3');
+Query OK, 1 row affected (0.07 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Blockchain Technology','Instructor4')
+    -> ;
+Query OK, 1 row affected (0.05 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Graph Theory','Instructor4');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Java Script','Instructor5');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> insert into instCourse values('Mysql','Instructor5');
+Query OK, 1 row affected (0.06 sec)
+
+MariaDB [ase_project]> select * from instCourse;
++-----------------------+-------------+
+| course                | instructor  |
++-----------------------+-------------+
+| Java                  | Instructor1 |
+| Python                | Instructor1 |
+| Machine Learning      | Instructor2 |
+| Cyber Security        | Instructor2 |
+| Computer Networks     | Instructor3 |
+| Data Structures       | Instructor3 |
+| Blockchain Technology | Instructor4 |
+| Graph Theory          | Instructor4 |
+| Java Script           | Instructor5 |
+| Mysql                 | Instructor5 |
++-----------------------+-------------+
+10 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select subNumber from courses WHERE courseName = 'Java';
++-----------+
+| subNumber |
++-----------+
+|         1 |
++-----------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select * from instCourses;
+ERROR 1146 (42S02): Table 'ase_project.instcourses' doesn't exist
+MariaDB [ase_project]> select * from instCourse;
++-----------------------+-------------+
+| course                | instructor  |
++-----------------------+-------------+
+| Java                  | Instructor1 |
+| Python                | Instructor1 |
+| Machine Learning      | Instructor2 |
+| Cyber Security        | Instructor2 |
+| Computer Networks     | Instructor3 |
+| Data Structures       | Instructor3 |
+| Blockchain Technology | Instructor4 |
+| Graph Theory          | Instructor4 |
+| Java Script           | Instructor5 |
+| Mysql                 | Instructor5 |
++-----------------------+-------------+
+10 rows in set (0.00 sec)
+
+MariaDB [ase_project]> create table inst_stud_AM(
+    -> roll_num int NOT NULL,
+    -> c_name varchar(100),
+    -> attendence int NOT NULL,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 6
+MariaDB [ase_project]> create table inst_stud_AM(
+    -> roll_num int NOT NULL,
+    -> c_id int NOT NULL,
+    -> attendence int NOT NULL,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num),
+    -> FOREIGN KEY (c_id) REFERENCES courses(courseId));
+Query OK, 0 rows affected (0.29 sec)
+
+MariaDB [ase_project]> select * from inst_stud_AM;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> create table project_paper(
+    -> paper_id int NOT NULL AUTO_INCREMENT,
+    -> instructorId int NOT NULL,
+    -> file_name varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+    -> uploaded_on datetime NOT NULL,
+    -> status enum('1','0') COLLATE utf8_unicode_ci NOT NULL DEFAULT '1',
+    -> PRIMARY KEY(paper_id),
+    -> FOREIGN KEY (instructorId) REFERENCES instructor_login(id)
+    -> )ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+Query OK, 0 rows affected (0.44 sec)
+
+MariaDB [ase_project]> select * from project_paper;
++----------+--------------+--------------+---------------------+--------+
+| paper_id | instructorId | file_name    | uploaded_on         | status |
++----------+--------------+--------------+---------------------+--------+
+|        1 |         2131 | 20110920.pdf | 2019-11-13 11:51:21 | 1      |
++----------+--------------+--------------+---------------------+--------+
+1 row in set (0.03 sec)
+
+MariaDB [ase_project]> create table enroll_java(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.55 sec)
+
+MariaDB [ase_project]> create table enroll_python(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.26 sec)
+
+MariaDB [ase_project]>  create table enroll_python(
+    ->     -> roll_num int NOT NULL,
+    ->     -> attendence int,
+    ->     -> marks int,
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '-> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,' at line 2
+MariaDB [ase_project]> create table enroll_ml(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.27 sec)
+
+MariaDB [ase_project]> create table enroll_cs(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.25 sec)
+
+MariaDB [ase_project]> create table enroll_cn(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.25 sec)
+
+MariaDB [ase_project]> create table enroll_ds(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.23 sec)
+
+MariaDB [ase_project]> create table enroll_bt(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.23 sec)
+
+MariaDB [ase_project]> create table enroll_gt(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.34 sec)
+
+MariaDB [ase_project]> create table enroll_js(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.37 sec)
+
+MariaDB [ase_project]> create table enroll_mysql(
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+ERROR 1072 (42000): Key column 'roll_num' doesn't exist in table
+MariaDB [ase_project]> drop table enroll_mysql;
+ERROR 1051 (42S02): Unknown table 'ase_project.enroll_mysql'
+MariaDB [ase_project]> drop table enroll_mysql;
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id:    2
+Current database: ase_project
+
+ERROR 1051 (42S02): Unknown table 'ase_project.enroll_mysql'
+MariaDB [ase_project]> create table enroll_mysql(
+    -> roll_num int NOT NULL,
+    -> attendence int,
+    -> marks int,
+    -> FOREIGN KEY (roll_num) REFERENCES student_info(roll_num));
+Query OK, 0 rows affected (0.28 sec)
+
+MariaDB [ase_project]> show tables;
++-----------------------+
+| Tables_in_ase_project |
++-----------------------+
+| accounts              |
+| admin_login           |
+| courses               |
+| enroll_bt             |
+| enroll_cn             |
+| enroll_cs             |
+| enroll_ds             |
+| enroll_gt             |
+| enroll_java           |
+| enroll_js             |
+| enroll_ml             |
+| enroll_mysql          |
+| enroll_python         |
+| inst_stud_am          |
+| instcourse            |
+| instructor_login      |
+| project_paper         |
+| registered_course     |
+| student_info          |
++-----------------------+
+19 rows in set (0.05 sec)
+
+MariaDB [ase_project]> select * from enroll_java;
+Empty set (0.03 sec)
+
+MariaDB [ase_project]> select * from registered_course;
++----------+----------+------------------+-------------------+-----------------------+-------------+
+| roll_num | Subject1 | Subject2         | Subject3          | Subject4              | Subject5    |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+|        2 | Java     | Machine Learning | Computer Networks | Blockchain Technology | Java Script |
++----------+----------+------------------+-------------------+-----------------------+-------------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_java;
++----------+------------+-------+
+| roll_num | attendence | marks |
++----------+------------+-------+
+|        2 |         34 |    23 |
++----------+------------+-------+
+1 row in set (0.00 sec)
+
+MariaDB [ase_project]>  select * from project_paper;
++----------+--------------+---------------------------+---------------------+--------+
+| paper_id | instructorId | file_name                 | uploaded_on         | status |
++----------+--------------+---------------------------+---------------------+--------+
+|        1 |         2131 | 20110920.pdf              | 2019-11-13 11:51:21 | 1      |
+|        2 |         2132 | Antiphishing_05670593.pdf | 2019-11-13 16:08:24 | 1      |
++----------+--------------+---------------------------+---------------------+--------+
+2 rows in set (0.03 sec)
+
+MariaDB [ase_project]> select * from adminAccounts;
+ERROR 1146 (42S02): Table 'ase_project.adminaccounts' doesn't exist
+MariaDB [ase_project]> select * from accounts;
++-----+-------+--------+
+| sno | funds | exp    |
++-----+-------+--------+
+|   1 |     0 |      0 |
+|   2 |     0 |      0 |
+|   3 |     0 |      0 |
+|   4 |     0 |      0 |
+|   5 |     0 |      0 |
+|   6 |     0 |      0 |
+|   7 |     0 |      0 |
+|   8 | 45343 | 453473 |
+|   9 | 45343 |      0 |
+|  10 |   424 |      0 |
+|  11 |     0 |      0 |
+|  12 |   424 | 453473 |
+|  13 |   424 |      0 |
+|  14 |     0 |      0 |
+|  15 |     0 |      0 |
+|  16 |     0 |      0 |
+|  17 |     0 |      0 |
+|  18 |     0 |      0 |
+|  19 |     0 |      0 |
+|  20 |   424 |  53463 |
++-----+-------+--------+
+20 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_java;
++----------+------------+-------+
+| roll_num | attendence | marks |
++----------+------------+-------+
+|        2 |         34 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |          0 |     0 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
++----------+------------+-------+
+32 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_java;
++----------+------------+-------+
+| roll_num | attendence | marks |
++----------+------------+-------+
+|        2 |         34 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |          0 |     0 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |        234 |   234 |
++----------+------------+-------+
+33 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_java;
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id:    623
+Current database: ase_project
+
++----------+------------+-------+
+| roll_num | attendence | marks |
++----------+------------+-------+
+|        2 |         34 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |          0 |     0 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |        234 |   234 |
+|        2 |         65 |    34 |
+|        2 |         54 |    43 |
+|        2 |        567 |   356 |
++----------+------------+-------+
+36 rows in set (0.09 sec)
+
+MariaDB [ase_project]> select * from enroll_java;
++----------+------------+-------+
+| roll_num | attendence | marks |
++----------+------------+-------+
+|        2 |         34 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |          0 |     0 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |        234 |   234 |
+|        2 |         65 |    34 |
+|        2 |         54 |    43 |
+|        2 |        567 |   356 |
+|        2 |         43 |   324 |
++----------+------------+-------+
+37 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_java;
++----------+------------+-------+
+| roll_num | attendence | marks |
++----------+------------+-------+
+|        2 |         34 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |         45 |    23 |
+|        2 |          0 |     0 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |         65 |    54 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |          0 |     0 |
+|        2 |        234 |   234 |
+|        2 |         65 |    34 |
+|        2 |         54 |    43 |
+|        2 |        567 |   356 |
+|        2 |         43 |   324 |
+|        2 |        365 |  4387 |
++----------+------------+-------+
+38 rows in set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id:    6
+Current database: ase_project
+
+Empty set (0.09 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]> select * from enroll_js;
+Empty set (0.00 sec)
+
+MariaDB [ase_project]>
